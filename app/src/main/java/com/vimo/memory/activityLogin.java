@@ -3,7 +3,10 @@ package com.vimo.memory;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -29,8 +32,32 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+import java.security.spec.InvalidParameterSpecException;
+import java.security.spec.KeySpec;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.KeyGenerator;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
@@ -160,7 +187,7 @@ public class activityLogin extends AppCompatActivity implements LoaderCallbacks<
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
+        /*if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
             mPasswordView.setError(getString(R.string.error_invalid_password));
             focusView = mPasswordView;
             cancel = true;
@@ -176,7 +203,7 @@ public class activityLogin extends AppCompatActivity implements LoaderCallbacks<
             focusView = mEmailView;
             cancel = true;
         }
-
+        */
         if (cancel) {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
@@ -184,12 +211,138 @@ public class activityLogin extends AppCompatActivity implements LoaderCallbacks<
         } else {
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
-            showProgress(true);
+            /*showProgress(true);
             mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);
+            mAuthTask.execute((Void) null);*/
+
+            saveFile("Hello From CoderzHeaven testing ");
+            decodeFile();
+
+            /*try {
+                String inputString = "ciao";
+                String myPwdEncode = "giuseppegiuseppe";
+                SecretKeySpec secret = new SecretKeySpec(myPwdEncode.getBytes(), "AES");
+
+                byte[] encoding = encryptMsg(inputString, secret);
+                System.out.println(encoding);
+
+                String decoding = decryptMsg(encoding, secret);
+                System.out.println(decoding);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }*/
+
+            startActivity(new Intent(activityLogin.this, activityLogged.class));
         }
     }
 
+    void saveFile(String stringToSave) {
+        try {
+            String encryptedFileName = "memory.mem";
+            File file = new File(this.getFilesDir().getPath() + File.separator +encryptedFileName);
+            //File file = new File(Environment.getExternalStorageDirectory() + File.separator, encryptedFileName);
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
+            String myPwdEncode = "giuseppegiuseppe";
+            SecretKeySpec yourKey = new SecretKeySpec(myPwdEncode.getBytes(), "AES");
+            byte[] filesBytes = encodeFile(yourKey, stringToSave.getBytes());
+            bos.write(filesBytes);
+            bos.flush();
+            bos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static byte[] encodeFile(SecretKey yourKey, byte[] fileData) throws Exception {
+        byte[] data = yourKey.getEncoded();
+        SecretKeySpec skeySpec = new SecretKeySpec(data, 0, data.length, "AES/ECB/PKCS5Padding");
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
+
+        byte[] encrypted = cipher.doFinal(fileData);
+        return encrypted;
+    }
+
+    void decodeFile() {
+        try {
+            String myPwdEncode = "giuseppegiuseppe";
+            SecretKeySpec yourKey = new SecretKeySpec(myPwdEncode.getBytes(), "AES");
+            byte[] decodedData = decodeFile(yourKey, readFile());
+            String str = new String(decodedData);
+            System.out.println("DECODED FILE CONTENTS : " + str);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public byte[] readFile() {
+        byte[] contents = null;
+
+        String encryptedFileName = "memory.mem";
+        File file = new File(this.getFilesDir().getPath() + File.separator +encryptedFileName);
+
+        //File file = new File(Environment.getExternalStorageDirectory() + File.separator, encryptedFileName);
+        int size = (int) file.length();
+        contents = new byte[size];
+        try {
+            BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
+            try {
+                buf.read(contents);
+                buf.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return contents;
+    }
+
+    public static byte[] decodeFile(SecretKey yourKey, byte[] fileData) throws Exception {
+        byte[] data = yourKey.getEncoded();
+        SecretKeySpec skeySpec = new SecretKeySpec(data, 0, data.length, "AES/ECB/PKCS5Padding");
+        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.DECRYPT_MODE, skeySpec);
+
+        byte[] decrypted = cipher.doFinal(fileData);
+        return decrypted;
+    }
+
+
+
+
+
+
+
+/*    public static byte[] encryptMsg(String message, SecretKey secret)
+            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidParameterSpecException, IllegalBlockSizeException,
+            UnsupportedEncodingException, Exception {
+
+        Cipher cipher = null;
+        cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, secret);
+        byte[] cipherText = cipher.doFinal(message.getBytes("UTF-8"));
+        return cipherText;
+    }
+
+    public static String decryptMsg(byte[] cipherText, SecretKey secret)
+            throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidParameterSpecException, InvalidAlgorithmParameterException, InvalidKeyException,
+            IllegalBlockSizeException, UnsupportedEncodingException, Exception {
+
+        Cipher cipher = null;
+        cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        cipher.init(Cipher.DECRYPT_MODE, secret);
+        String decryptString = new String(cipher.doFinal(cipherText), "UTF-8");
+        return decryptString;
+    }
+*/
     private boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic
         return email.contains("@");
