@@ -6,6 +6,8 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
@@ -38,6 +40,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidAlgorithmParameterException;
@@ -61,27 +64,11 @@ import javax.crypto.spec.SecretKeySpec;
 
 import static android.Manifest.permission.READ_CONTACTS;
 
-/**
- * A login screen that offers login via email/password.
- */
 public class activityLogin extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
-    /**
-     * Id to identity READ_CONTACTS permission request.
-     */
     private static final int REQUEST_READ_CONTACTS = 0;
-
-    /**
-     * A dummy authentication store containing known user names and passwords.
-     * TODO: remove after connecting to a real authentication system.
-     */
-    private static final String[] DUMMY_CREDENTIALS = new String[]{
-            "foo@example.com:hello", "bar@example.com:world"
-    };
-    /**
-     * Keep track of the login task to ensure we can cancel it if requested.
-     */
-    private UserLoginTask mAuthTask = null;
+    String encryptedFileName = "memory.mem";
+    String myPwdEncode = "giuseppegiuseppe";
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -122,41 +109,14 @@ public class activityLogin extends AppCompatActivity implements LoaderCallbacks<
     }
 
     private void populateAutoComplete() {
-        if (!mayRequestContacts()) {
-            return;
-        }
-
         getLoaderManager().initLoader(0, null, this);
-    }
-
-    private boolean mayRequestContacts() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return true;
-        }
-        if (checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
-            return true;
-        }
-        if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
-            Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
-                    .setAction(android.R.string.ok, new View.OnClickListener() {
-                        @Override
-                        @TargetApi(Build.VERSION_CODES.M)
-                        public void onClick(View v) {
-                            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-                        }
-                    });
-        } else {
-            requestPermissions(new String[]{READ_CONTACTS}, REQUEST_READ_CONTACTS);
-        }
-        return false;
     }
 
     /**
      * Callback received when a permissions request has been completed.
      */
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         if (requestCode == REQUEST_READ_CONTACTS) {
             if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 populateAutoComplete();
@@ -164,17 +124,12 @@ public class activityLogin extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
-
     /**
      * Attempts to sign in or register the account specified by the login form.
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
     private void attemptLogin() {
-        if (mAuthTask != null) {
-            return;
-        }
-
         // Reset errors.
         mEmailView.setError(null);
         mPasswordView.setError(null);
@@ -204,6 +159,36 @@ public class activityLogin extends AppCompatActivity implements LoaderCallbacks<
             cancel = true;
         }
         */
+
+        File file = new File(this.getFilesDir().getPath() + File.separator +encryptedFileName);
+        file=null;
+        String content = decodeFile(file);
+        if (content==null) {
+            //non ho il file presente - lo creo
+            if (isOnline()) {
+                //se sono online cerco account remoto
+                boolean existUserInDB = false;
+                //faccio query su db per vedere se l'utente esiste
+                existUserInDB = true;
+                //scrivo su file prima riga nomeutente:::password
+                file = new File(this.getFilesDir().getPath() + File.separator +encryptedFileName);
+                try {
+                    file.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                saveFile(email+":::"+password);
+                appendFile("peppe");
+
+            } else {
+                cancel = false;
+            }
+        } else {
+            String result = decodeFile(file);
+
+
+        }
+
         if (cancel) {
             // There was an error; don't attempt login and focus the first
             // form field with an error.
@@ -215,22 +200,10 @@ public class activityLogin extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = new UserLoginTask(email, password);
             mAuthTask.execute((Void) null);*/
 
-            saveFile("Hello From CoderzHeaven testing ");
-            decodeFile();
+            //saveFile("Hello From CoderzHeaven testing ");
 
-            /*try {
-                String inputString = "ciao";
-                String myPwdEncode = "giuseppegiuseppe";
-                SecretKeySpec secret = new SecretKeySpec(myPwdEncode.getBytes(), "AES");
-
-                byte[] encoding = encryptMsg(inputString, secret);
-                System.out.println(encoding);
-
-                String decoding = decryptMsg(encoding, secret);
-                System.out.println(decoding);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }*/
+            file = new File(this.getFilesDir().getPath() + File.separator +encryptedFileName);
+            String result = decodeFile(file);
 
             startActivity(new Intent(activityLogin.this, activityLogged.class));
         }
@@ -238,14 +211,11 @@ public class activityLogin extends AppCompatActivity implements LoaderCallbacks<
 
     void saveFile(String stringToSave) {
         try {
-            String encryptedFileName = "memory.mem";
             File file = new File(this.getFilesDir().getPath() + File.separator +encryptedFileName);
-            //File file = new File(Environment.getExternalStorageDirectory() + File.separator, encryptedFileName);
             if (!file.exists()) {
                 file.createNewFile();
             }
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-            String myPwdEncode = "giuseppegiuseppe";
             SecretKeySpec yourKey = new SecretKeySpec(myPwdEncode.getBytes(), "AES");
             byte[] filesBytes = encodeFile(yourKey, stringToSave.getBytes());
             bos.write(filesBytes);
@@ -260,6 +230,45 @@ public class activityLogin extends AppCompatActivity implements LoaderCallbacks<
         }
     }
 
+    public void appendFile(String stringToSave) {
+
+        try {
+            File file = new File(this.getFilesDir().getPath() + File.separator +encryptedFileName);
+            if (!file.exists()) {
+                file.createNewFile();
+            }
+
+            FileOutputStream fos = openFileOutput(encryptedFileName, getApplicationContext().MODE_APPEND);
+
+            BufferedOutputStream bos = new BufferedOutputStream(fos);
+            SecretKeySpec yourKey = new SecretKeySpec(myPwdEncode.getBytes(), "AES");
+            byte[] filesBytes = encodeFile(yourKey, stringToSave.getBytes());
+            bos.write(filesBytes);
+            bos.flush();
+            bos.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+    public String decodeFile(File file) {
+        if (file==null || !file.exists()) return null;
+        try {
+            SecretKeySpec yourKey = new SecretKeySpec(myPwdEncode.getBytes(), "AES");
+            byte[] decodedData = decodeFile(yourKey, readFile(file));
+            String str = new String(decodedData);
+            System.out.println("DECODED FILE CONTENTS : " + str);
+            return str;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
     public static byte[] encodeFile(SecretKey yourKey, byte[] fileData) throws Exception {
         byte[] data = yourKey.getEncoded();
         SecretKeySpec skeySpec = new SecretKeySpec(data, 0, data.length, "AES/ECB/PKCS5Padding");
@@ -270,25 +279,8 @@ public class activityLogin extends AppCompatActivity implements LoaderCallbacks<
         return encrypted;
     }
 
-    void decodeFile() {
-        try {
-            String myPwdEncode = "giuseppegiuseppe";
-            SecretKeySpec yourKey = new SecretKeySpec(myPwdEncode.getBytes(), "AES");
-            byte[] decodedData = decodeFile(yourKey, readFile());
-            String str = new String(decodedData);
-            System.out.println("DECODED FILE CONTENTS : " + str);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public byte[] readFile() {
+    public byte[] readFile(File file) {
         byte[] contents = null;
-
-        String encryptedFileName = "memory.mem";
-        File file = new File(this.getFilesDir().getPath() + File.separator +encryptedFileName);
-
-        //File file = new File(Environment.getExternalStorageDirectory() + File.separator, encryptedFileName);
         int size = (int) file.length();
         contents = new byte[size];
         try {
@@ -315,34 +307,6 @@ public class activityLogin extends AppCompatActivity implements LoaderCallbacks<
         return decrypted;
     }
 
-
-
-
-
-
-
-/*    public static byte[] encryptMsg(String message, SecretKey secret)
-            throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidParameterSpecException, IllegalBlockSizeException,
-            UnsupportedEncodingException, Exception {
-
-        Cipher cipher = null;
-        cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, secret);
-        byte[] cipherText = cipher.doFinal(message.getBytes("UTF-8"));
-        return cipherText;
-    }
-
-    public static String decryptMsg(byte[] cipherText, SecretKey secret)
-            throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidParameterSpecException, InvalidAlgorithmParameterException, InvalidKeyException,
-            IllegalBlockSizeException, UnsupportedEncodingException, Exception {
-
-        Cipher cipher = null;
-        cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-        cipher.init(Cipher.DECRYPT_MODE, secret);
-        String decryptString = new String(cipher.doFinal(cipherText), "UTF-8");
-        return decryptString;
-    }
-*/
     private boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic
         return email.contains("@");
@@ -443,61 +407,14 @@ public class activityLogin extends AppCompatActivity implements LoaderCallbacks<
         int IS_PRIMARY = 1;
     }
 
-    /**
-     * Represents an asynchronous login/registration task used to authenticate
-     * the user.
-     */
-    public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
-
-        private final String mEmail;
-        private final String mPassword;
-
-        UserLoginTask(String email, String password) {
-            mEmail = email;
-            mPassword = password;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... params) {
-            // TODO: attempt authentication against a network service.
-
-            try {
-                // Simulate network access.
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                return false;
-            }
-
-            for (String credential : DUMMY_CREDENTIALS) {
-                String[] pieces = credential.split(":");
-                if (pieces[0].equals(mEmail)) {
-                    // Account exists, return true if the password matches.
-                    return pieces[1].equals(mPassword);
-                }
-            }
-
-            // TODO: register the new account here.
+    protected boolean isOnline() {
+        ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        if (netInfo != null && netInfo.isConnectedOrConnecting()) {
             return true;
-        }
-
-        @Override
-        protected void onPostExecute(final Boolean success) {
-            mAuthTask = null;
-            showProgress(false);
-
-            if (success) {
-                finish();
-            } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
-            }
-        }
-
-        @Override
-        protected void onCancelled() {
-            mAuthTask = null;
-            showProgress(false);
+        } else {
+            return false;
         }
     }
-}
 
+}
