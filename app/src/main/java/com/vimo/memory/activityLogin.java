@@ -33,6 +33,8 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.vimo.memory.utils.FileUtils;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -63,7 +65,8 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class activityLogin extends AppCompatActivity  {
 
-    String encryptedFileName = "memory.mem";
+    String encryptedFileNameU = "latlng.mem";
+    String encryptedFileNameA = "latitude.mem";
     String myPwdEncode = "giuseppegiuseppe";
 
     // UI references.
@@ -140,9 +143,15 @@ public class activityLogin extends AppCompatActivity  {
         }
         */
 
-        File file = new File(this.getFilesDir().getPath() + File.separator +encryptedFileName);
-        file=null;
-        String content = decodeFile(file);
+        File file = new File(this.getFilesDir().getPath() + File.separator +encryptedFileNameU);
+        boolean simulateFirstAccess = false;
+        if (simulateFirstAccess && file.exists()) {    //simulo primo accesso
+            file.delete();
+            boolean exist = file.exists();
+            System.out.print(exist);
+        }
+
+        String content = FileUtils.decodeFile(file);
         if (content==null) {
             //non ho il file presente - lo creo
             if (isOnline()) {
@@ -151,50 +160,63 @@ public class activityLogin extends AppCompatActivity  {
                 //faccio query su db per vedere se l'utente esiste
                 existUserInDB = true;
                 //scrivo su file prima riga nomeutente:::password
-                file = new File(this.getFilesDir().getPath() + File.separator +encryptedFileName);
-                try {
-                    file.createNewFile();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                saveFile(email+":::"+password);
-                appendFile("peppe");
+                if (existUserInDB) {
+                    try {
+                        file.createNewFile();
+                        FileUtils.saveFile(file, email + ":::" + password);
+                        //appendFile("peppe");
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
 
+                    //vado view successa, che sarà vuota
+                    startActivity(new Intent(activityLogin.this, activityLogged.class));
+                } else {
+                    return;
+                }
             } else {
                 cancel = false;
             }
         } else {
-            String result = decodeFile(file);
+            String result = FileUtils.decodeFile(file);
 
-
-        }
-
-        if (cancel) {
-            // There was an error; don't attempt login and focus the first
-            // form field with an error.
-            focusView.requestFocus();
-        } else {
-            // Show a progress spinner, and kick off a background task to
-            // perform the user login attempt.
-            /*showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
-            mAuthTask.execute((Void) null);*/
-
-            //saveFile("Hello From CoderzHeaven testing ");
-
-            file = new File(this.getFilesDir().getPath() + File.separator +encryptedFileName);
-            String result = decodeFile(file);
-
-            startActivity(new Intent(activityLogin.this, activityLogged.class));
+            //estraggo prima riga
+            String[] acc = result.split(":::");
+            if (acc.length==2 && acc[0].equals(email) && acc[1].equals(password)) {
+                startActivity(new Intent(activityLogin.this, activityLogged.class));
+            } else {
+                return;
+            }
         }
     }
 
-    void saveFile(String stringToSave) {
+    /*  public void appendFile(String stringToSave) {
+
+      try {
+          File file = new File(this.getFilesDir().getPath() + File.separator +encryptedFileName);
+          if (!file.exists()) {
+              file.createNewFile();
+          }
+
+          FileOutputStream fos = openFileOutput(encryptedFileName, getApplicationContext().MODE_APPEND);
+
+          BufferedOutputStream bos = new BufferedOutputStream(fos);
+          SecretKeySpec yourKey = new SecretKeySpec(myPwdEncode.getBytes(), "AES");
+          byte[] filesBytes = encodeFile(yourKey, stringToSave.getBytes());
+          bos.write(filesBytes);
+          bos.flush();
+          bos.close();
+      } catch (FileNotFoundException e) {
+          e.printStackTrace();
+      } catch (IOException e) {
+          e.printStackTrace();
+      } catch (Exception e) {
+          e.printStackTrace();
+      }
+  }*/
+
+   /* void saveFile(File file, String stringToSave) {
         try {
-            File file = new File(this.getFilesDir().getPath() + File.separator +encryptedFileName);
-            if (!file.exists()) {
-                file.createNewFile();
-            }
             BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
             SecretKeySpec yourKey = new SecretKeySpec(myPwdEncode.getBytes(), "AES");
             byte[] filesBytes = encodeFile(yourKey, stringToSave.getBytes());
@@ -210,31 +232,6 @@ public class activityLogin extends AppCompatActivity  {
         }
     }
 
-    public void appendFile(String stringToSave) {
-
-        try {
-            File file = new File(this.getFilesDir().getPath() + File.separator +encryptedFileName);
-            if (!file.exists()) {
-                file.createNewFile();
-            }
-
-            FileOutputStream fos = openFileOutput(encryptedFileName, getApplicationContext().MODE_APPEND);
-
-            BufferedOutputStream bos = new BufferedOutputStream(fos);
-            SecretKeySpec yourKey = new SecretKeySpec(myPwdEncode.getBytes(), "AES");
-            byte[] filesBytes = encodeFile(yourKey, stringToSave.getBytes());
-            bos.write(filesBytes);
-            bos.flush();
-            bos.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-    }
     public String decodeFile(File file) {
         if (file==null || !file.exists()) return null;
         try {
@@ -285,7 +282,7 @@ public class activityLogin extends AppCompatActivity  {
 
         byte[] decrypted = cipher.doFinal(fileData);
         return decrypted;
-    }
+    }*/
 
     private boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic
