@@ -65,9 +65,9 @@ import javax.crypto.spec.SecretKeySpec;
 
 public class activityLogin extends AppCompatActivity  {
 
-    String encryptedFileNameU = "latlng.mem";
+    /*String encryptedFileNameU = "latlng.mem";
     String encryptedFileNameA = "latitude.mem";
-    String myPwdEncode = "giuseppegiuseppe";
+    String myPwdEncode = "giuseppegiuseppe";*/
 
     // UI references.
     private AutoCompleteTextView mEmailView;
@@ -143,9 +143,9 @@ public class activityLogin extends AppCompatActivity  {
         }
         */
 
-        File file = new File(this.getFilesDir().getPath() + File.separator +encryptedFileNameU);
-        boolean simulateFirstAccess = false;
-        if (simulateFirstAccess && file.exists()) {    //simulo primo accesso
+        File file = new File(this.getFilesDir().getPath() + File.separator + FileUtils.encryptedFileNameUser);
+        boolean simulateFirstAccess = false;//simulo primo accesso
+        if (simulateFirstAccess && file.exists()) {
             file.delete();
             boolean exist = file.exists();
             System.out.print(exist);
@@ -169,8 +169,13 @@ public class activityLogin extends AppCompatActivity  {
                         e.printStackTrace();
                     }
 
-                    //vado view successa, che sarà vuota
-                    startActivity(new Intent(activityLogin.this, activityLogged.class));
+                    //vado view successa
+                    //startActivity(new Intent(activityLogin.this, activityLogged.class));
+
+                    Intent i = new Intent(activityLogin.this, activityLogged.class);
+                    i.putExtra("session", true);
+                    i.putExtra("user", email);
+                    startActivity(i);
                 } else {
                     return;
                 }
@@ -181,7 +186,7 @@ public class activityLogin extends AppCompatActivity  {
             String result = FileUtils.decodeFile(file);
 
             //estraggo prima riga
-            String[] acc = result.split(":::");
+            String[] acc = result.split(FileUtils.SEPARATOR);
             if (acc.length==2 && acc[0].equals(email) && acc[1].equals(password)) {
                 startActivity(new Intent(activityLogin.this, activityLogged.class));
             } else {

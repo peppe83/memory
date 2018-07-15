@@ -8,13 +8,36 @@ import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.ImageButton;
 
+import com.vimo.memory.utils.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
+
 public class activityLogged extends AppCompatActivity {
 
     private AutoCompleteTextView mSearchView;
+    private String user;
+    File fileAccount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Bundle b = getIntent().getExtras();
+        if (b!=null && b.containsKey("session")) {
+            boolean session = b.getBoolean("session");
+            user = b.getString("user");
+            if (!session) {
+                startActivity(new Intent(activityLogged.this, activityLogin.class));
+            }
+        }
+        fileAccount = new File(this.getFilesDir().getPath() + File.separator + FileUtils.encryptedFileNameAccount);
+        if (!fileAccount.exists()) {
+            try {
+                fileAccount.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
         setContentView(R.layout.activity_logged);
 
         mSearchView = (AutoCompleteTextView) findViewById(R.id.txt_tag);
@@ -31,7 +54,11 @@ public class activityLogged extends AppCompatActivity {
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(activityLogged.this, ActivityAdd.class));
+                //startActivity(new Intent(activityLogged.this, ActivityAdd.class));
+                Intent i = new Intent(activityLogged.this, ActivityAdd.class);
+                i.putExtra("session", true);
+                i.putExtra("user", user);
+                startActivity(i);
             }
         });
     }
@@ -46,6 +73,16 @@ public class activityLogged extends AppCompatActivity {
         } else {
             mSearchView.setError(null);
             //TODO - faccio la ricerca
+            String content = FileUtils.decodeFile(fileAccount);
+            String key = FileUtils.getKeySearchInRow(content);
+            if (key.toLowerCase().contains(tag.toLowerCase())) {
+                String msg = "trovato";
+                String ho = "";
+            } else {
+                String msg = "non trovato";
+                String ho = "";
+            }
+
         }
     }
 }
