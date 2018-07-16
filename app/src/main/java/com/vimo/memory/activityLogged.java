@@ -1,8 +1,16 @@
 package com.vimo.memory;
 
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Layout;
+import android.util.TypedValue;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AutoCompleteTextView;
@@ -14,6 +22,7 @@ import android.widget.TextView;
 
 import com.vimo.memory.data.Account;
 import com.vimo.memory.utils.FileUtils;
+import com.vimo.memory.utils.TextDrawable;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,8 +46,13 @@ public class activityLogged extends AppCompatActivity {
             user = b.getString("user");
             if (!session) {
                 startActivity(new Intent(activityLogged.this, activityLogin.class));
+                return;
             }
+        } else {
+            startActivity(new Intent(activityLogged.this, activityLogin.class));
+            return;
         }
+
         listResult = new ArrayList<Account>();
         fileAccount = new File(this.getFilesDir().getPath() + File.separator + FileUtils.encryptedFileNameAccount);
         if (!fileAccount.exists()) {
@@ -60,7 +74,21 @@ public class activityLogged extends AppCompatActivity {
             }
         });
 
-        ImageButton btnAdd = (ImageButton) findViewById(R.id.btn_add);
+        /*ImageButton btnAdd = (ImageButton) findViewById(R.id.btn_add);
+        btnAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //startActivity(new Intent(activityLogged.this, ActivityAdd.class));
+                Intent i = new Intent(activityLogged.this, ActivityAdd.class);
+                i.putExtra("session", true);
+                i.putExtra("user", user);
+                startActivity(i);
+            }
+        });*/
+
+        Typeface fontAwesomeFont = Typeface.createFromAsset(getAssets(), "fontawesome-webfont.ttf");
+        Button btnAdd = (Button) findViewById(R.id.btn_add);
+        btnAdd.setTypeface(fontAwesomeFont);
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -75,6 +103,46 @@ public class activityLogged extends AppCompatActivity {
         listViewResult = (ListView) findViewById(R.id.listViewResult);
         CustomAdapter customAdapter = new CustomAdapter();
         listViewResult.setAdapter(customAdapter);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        Typeface fontAwesomeFont = Typeface.createFromAsset(getAssets(), "fontawesome-webfont.ttf");
+        TextDrawable faIcon = new TextDrawable(this);
+        //faIcon.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
+        faIcon.setTextSize(TypedValue.COMPLEX_UNIT_PT, 15);
+        faIcon.setTextAlign(Layout.Alignment.ALIGN_CENTER);
+        int color = Color.parseColor("#2cb789");
+        faIcon.setTextColor(color);
+        //btn1.getBackground().mutate().setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC));*/
+        faIcon.setTypeface(fontAwesomeFont);
+        faIcon.setText(getResources().getText(R.string.font_awesome_android_add));
+
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.toolbar, menu);
+
+        MenuItem menuItem = menu.findItem(R.id.action_add_account);
+        menuItem.setIcon(faIcon);
+        //menuItem.setOnMenuItemClickListener()
+
+        return true;
+    }
+
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // action with ID action_refresh was selected
+            case R.id.action_add_account:
+                Intent i = new Intent(activityLogged.this, ActivityAdd.class);
+                i.putExtra("session", true);
+                i.putExtra("user", user);
+                startActivity(i);
+                break;
+            default:
+                break;
+        }
+        return true;
     }
 
     private void search() {

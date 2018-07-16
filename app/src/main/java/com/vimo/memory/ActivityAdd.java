@@ -2,6 +2,10 @@ package com.vimo.memory;
 
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.Typeface;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -30,18 +34,53 @@ public class ActivityAdd extends AppCompatActivity {
             user = b.getString("user");
             if (!session) {
                 startActivity(new Intent(ActivityAdd.this, activityLogin.class));
+                return;
             }
+        } else {
+            startActivity(new Intent(ActivityAdd.this, activityLogin.class));
+            return;
         }
 
         setContentView(R.layout.activity_add);
 
-        Button btnAdd = (Button) findViewById(R.id.btnAddAcount);
+        Typeface fontAwesomeFont = Typeface.createFromAsset(getAssets(), "fontawesome-webfont.ttf");
+        Button btnAdd = (Button) findViewById(R.id.btn_add);
+        btnAdd.setTypeface(fontAwesomeFont);
+        /*int color = Color.parseColor("#FFFFFF");
+        btn1.getBackground().mutate().setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC));*/
         btnAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 addAccount();
             }
         });
+
+        Button btn_cancel = (Button) findViewById(R.id.btn_cancel);
+        btn_cancel.setTypeface(fontAwesomeFont);
+        /*int color = Color.parseColor("#FFFFFF");
+        btn1.getBackground().mutate().setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC));*/
+        btn_cancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                backView();
+            }
+        });
+
+
+        /*Button btnAdd = (Button) findViewById(R.id.btnAddAcount);
+        btnAdd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                addAccount();
+            }
+        });*/
+    }
+
+    public void backView() {
+        Intent i = new Intent(ActivityAdd.this, activityLogged.class);
+        i.putExtra("session", true);
+        i.putExtra("user", user);
+        startActivity(i);
     }
 
     public void addAccount() {

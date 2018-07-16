@@ -6,7 +6,7 @@
     <string name="prompt_password">Password</string>
     <string name="prompt_confirm_password">Conferma password</string>
     <!--<string name="prompt_tag">Tag</string>-->
-    <string name="add_account">Inserisci account</string>
+    <string name="add_account">Nuovo account</string>
     <string name="prompt_key_search">Parola chiave</string>
     <string name="prompt_typeAdd">Tipo account</string>
     <string name="prompt_link">Link</string>
@@ -22,11 +22,16 @@
     <string name="error_field_required">Il campo è obbligatorio</string>
     <string name="error_field_pwd_no_match">Le due password sono diverse</string>
 
+    <string name="font_awesome_android_save">&#xf0c7;</string>
+    <string name="font_awesome_android_cancel">&#xf0e2;</string>
+    <string name="font_awesome_android_add">&#xf055;</string>
+    <string name="font_awesome_android_login">&#xf2f6;</string>
+    <string name="font_awesome_android_logout">&#xf2f5;</string>
+    <string name="font_awesome_android_search">&#xf002;</string>
 
     <string name="type1">Sito</string>
     <string name="type2">Identià</string>
     <string name="type3">Card</string>
-
     <string-array name="typelist">
         <item>@string/type1</item>
         <item>@string/type2</item>

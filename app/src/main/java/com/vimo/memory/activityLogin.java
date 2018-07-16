@@ -6,6 +6,7 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Typeface;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Environment;
@@ -24,6 +25,8 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
@@ -31,6 +34,7 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.vimo.memory.utils.FileUtils;
@@ -94,13 +98,23 @@ public class activityLogin extends AppCompatActivity  {
             }
         });
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
-        mEmailSignInButton.setOnClickListener(new OnClickListener() {
+        ImageButton mSignInButton = (ImageButton) findViewById(R.id.sign_in_button);
+        mSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
                 attemptLogin();
             }
         });
+        /*Button mSignInButton = (Button) findViewById(R.id.sign_in_button);
+        mSignInButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                attemptLogin();
+            }
+        });*/
+
+        //Typeface fontAwesomeFont = Typeface.createFromAsset(getAssets(), "fontawesome-webfont.ttf");
+        //mSignInButton.setTypeface(fontAwesomeFont);
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
@@ -188,106 +202,15 @@ public class activityLogin extends AppCompatActivity  {
             //estraggo prima riga
             String[] acc = result.split(FileUtils.SEPARATOR);
             if (acc.length==2 && acc[0].equals(email) && acc[1].equals(password)) {
-                startActivity(new Intent(activityLogin.this, activityLogged.class));
+                Intent i = new Intent(activityLogin.this, activityLogged.class);
+                i.putExtra("session", true);
+                i.putExtra("user", email);
+                startActivity(i);
             } else {
-                return;
+                //return;   //TODO mostrare un errore
             }
         }
     }
-
-    /*  public void appendFile(String stringToSave) {
-
-      try {
-          File file = new File(this.getFilesDir().getPath() + File.separator +encryptedFileName);
-          if (!file.exists()) {
-              file.createNewFile();
-          }
-
-          FileOutputStream fos = openFileOutput(encryptedFileName, getApplicationContext().MODE_APPEND);
-
-          BufferedOutputStream bos = new BufferedOutputStream(fos);
-          SecretKeySpec yourKey = new SecretKeySpec(myPwdEncode.getBytes(), "AES");
-          byte[] filesBytes = encodeFile(yourKey, stringToSave.getBytes());
-          bos.write(filesBytes);
-          bos.flush();
-          bos.close();
-      } catch (FileNotFoundException e) {
-          e.printStackTrace();
-      } catch (IOException e) {
-          e.printStackTrace();
-      } catch (Exception e) {
-          e.printStackTrace();
-      }
-  }*/
-
-   /* void saveFile(File file, String stringToSave) {
-        try {
-            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(file));
-            SecretKeySpec yourKey = new SecretKeySpec(myPwdEncode.getBytes(), "AES");
-            byte[] filesBytes = encodeFile(yourKey, stringToSave.getBytes());
-            bos.write(filesBytes);
-            bos.flush();
-            bos.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    public String decodeFile(File file) {
-        if (file==null || !file.exists()) return null;
-        try {
-            SecretKeySpec yourKey = new SecretKeySpec(myPwdEncode.getBytes(), "AES");
-            byte[] decodedData = decodeFile(yourKey, readFile(file));
-            String str = new String(decodedData);
-            System.out.println("DECODED FILE CONTENTS : " + str);
-            return str;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    public static byte[] encodeFile(SecretKey yourKey, byte[] fileData) throws Exception {
-        byte[] data = yourKey.getEncoded();
-        SecretKeySpec skeySpec = new SecretKeySpec(data, 0, data.length, "AES/ECB/PKCS5Padding");
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
-
-        byte[] encrypted = cipher.doFinal(fileData);
-        return encrypted;
-    }
-
-    public byte[] readFile(File file) {
-        byte[] contents = null;
-        int size = (int) file.length();
-        contents = new byte[size];
-        try {
-            BufferedInputStream buf = new BufferedInputStream(new FileInputStream(file));
-            try {
-                buf.read(contents);
-                buf.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        return contents;
-    }
-
-    public static byte[] decodeFile(SecretKey yourKey, byte[] fileData) throws Exception {
-        byte[] data = yourKey.getEncoded();
-        SecretKeySpec skeySpec = new SecretKeySpec(data, 0, data.length, "AES/ECB/PKCS5Padding");
-        Cipher cipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
-        cipher.init(Cipher.DECRYPT_MODE, skeySpec);
-
-        byte[] decrypted = cipher.doFinal(fileData);
-        return decrypted;
-    }*/
 
     private boolean isEmailValid(String email) {
         //TODO: Replace this with your own logic
@@ -299,54 +222,6 @@ public class activityLogin extends AppCompatActivity  {
         return password.length() > 4;
     }
 
-    /**
-     * Shows the progress UI and hides the login form.
-     */
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-    private void showProgress(final boolean show) {
-        // On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-        // for very easy animations. If available, use these APIs to fade-in
-        // the progress spinner.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-            int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-            mLoginFormView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 0 : 1).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-                }
-            });
-
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mProgressView.animate().setDuration(shortAnimTime).alpha(
-                    show ? 1 : 0).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-                }
-            });
-        } else {
-            // The ViewPropertyAnimator APIs are not available, so simply show
-            // and hide the relevant UI components.
-            mProgressView.setVisibility(show ? View.VISIBLE : View.GONE);
-            mLoginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-        }
-    }
-
-
-    private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
-        //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
-        ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(activityLogin.this,
-                        android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
-
-        mEmailView.setAdapter(adapter);
-    }
-
-
-
     protected boolean isOnline() {
         ConnectivityManager cm = (ConnectivityManager)getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = cm.getActiveNetworkInfo();
@@ -356,5 +231,4 @@ public class activityLogin extends AppCompatActivity  {
             return false;
         }
     }
-
 }

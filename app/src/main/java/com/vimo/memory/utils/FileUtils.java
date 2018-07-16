@@ -172,7 +172,7 @@ public class FileUtils {
         for (; st.hasMoreTokens();) {
             String row = st.nextToken();
             Account acc = Account.buildAccount(row);
-            if (acc!=null && acc.getTag().toLowerCase().contains(tag.toLowerCase())) {
+            if (acc!=null && (acc.getTag().toLowerCase().contains(tag.toLowerCase()) || tag.toLowerCase().equals("*"))) {
                 listAccount.add(acc);
             }
         }
@@ -184,5 +184,4 @@ public class FileUtils {
         boolean del = Boolean.valueOf(delete);
         return del;
     }
-
 }
