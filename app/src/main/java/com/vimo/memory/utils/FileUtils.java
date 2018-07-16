@@ -131,41 +131,6 @@ public class FileUtils {
         return null;
     }
 
-    public static String getIdInRow(String row) {
-        String id = getInRow(row, 0);
-        return id;
-    }
-
-    public static String getIdUserInRow(String row) {
-        String idUser = getInRow(row, 1);
-        return idUser;
-    }
-
-    public static String getIdTypeInRow(String row) {
-        String idType = getInRow(row, 2);
-        return idType;
-    }
-
-    public static String getLinkInRow(String row) {
-        String link = getInRow(row, 3);
-        return link;
-    }
-
-    public static String getUserNameInRow(String row) {
-        String username = getInRow(row, 4);
-        return username;
-    }
-
-    public static String getPasswordInRow(String row) {
-        String password = getInRow(row, 5);
-        return password;
-    }
-
-    public static String getOtpInRow(String row) {
-        String otp = getInRow(row, 6);
-        return otp;
-    }
-
     public static List<Account> getKeySearchInFile(String contentFile, String tag) {
         ArrayList<Account> listAccount = new ArrayList<Account>();
         StringTokenizer st = new StringTokenizer(contentFile, NEW_LINE);
@@ -183,5 +148,21 @@ public class FileUtils {
         String delete = getInRow(row, 8);
         boolean del = Boolean.valueOf(delete);
         return del;
+    }
+
+    public static int getNextIdFile(String contentFile) {
+        ArrayList<Account> listAccount = new ArrayList<Account>();
+        StringTokenizer st = new StringTokenizer(contentFile, NEW_LINE);
+        int nextId = 0;
+        Account acc = null;
+        for (; st.hasMoreTokens();) {
+            String row = st.nextToken();
+            acc = Account.buildAccount(row);
+        }
+
+        if (acc!=null) {
+            nextId = Integer.parseInt(acc.getIdFile())+1;
+        }
+        return nextId;
     }
 }

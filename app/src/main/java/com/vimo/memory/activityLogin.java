@@ -3,6 +3,7 @@ package com.vimo.memory;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -36,6 +37,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.vimo.memory.utils.FileUtils;
 
@@ -139,23 +141,25 @@ public class activityLogin extends AppCompatActivity  {
         View focusView = null;
 
         // Check for a valid password, if the user entered one.
-        /*if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-            mPasswordView.setError(getString(R.string.error_invalid_password));
-            focusView = mPasswordView;
+        if (TextUtils.isEmpty(password)) { //&& !isPasswordValid(password)
+            mPasswordView.setError(getString(R.string.error_field_required));
+            mPasswordView.requestFocus();
             cancel = true;
         }
 
         // Check for a valid email address.
         if (TextUtils.isEmpty(email)) {
             mEmailView.setError(getString(R.string.error_field_required));
-            focusView = mEmailView;
+            mEmailView.requestFocus();
             cancel = true;
-        } else if (!isEmailValid(email)) {
+        } /*else if (!isEmailValid(email)) {
             mEmailView.setError(getString(R.string.error_invalid_email));
             focusView = mEmailView;
             cancel = true;
         }
         */
+
+        if (cancel) return;
 
         File file = new File(this.getFilesDir().getPath() + File.separator + FileUtils.encryptedFileNameUser);
         boolean simulateFirstAccess = false;//simulo primo accesso
@@ -172,33 +176,32 @@ public class activityLogin extends AppCompatActivity  {
                 //se sono online cerco account remoto
                 boolean existUserInDB = false;
                 //faccio query su db per vedere se l'utente esiste
-                existUserInDB = true;
+                existUserInDB = true; //TODO
                 //scrivo su file prima riga nomeutente:::password
                 if (existUserInDB) {
                     try {
                         file.createNewFile();
-                        FileUtils.saveFile(file, email + ":::" + password);
-                        //appendFile("peppe");
+                        FileUtils.saveFile(file, email + FileUtils.SEPARATOR + password);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
 
                     //vado view successa
                     //startActivity(new Intent(activityLogin.this, activityLogged.class));
-
                     Intent i = new Intent(activityLogin.this, activityLogged.class);
                     i.putExtra("session", true);
                     i.putExtra("user", email);
                     startActivity(i);
                 } else {
+                    Toast.makeText(this, R.string.msg_no_user_registred , Toast.LENGTH_SHORT).show();
                     return;
                 }
             } else {
-                cancel = false;
+                Toast.makeText(this, R.string.msg_no_connection , Toast.LENGTH_SHORT).show();
+                return;
             }
         } else {
             String result = FileUtils.decodeFile(file);
-
             //estraggo prima riga
             String[] acc = result.split(FileUtils.SEPARATOR);
             if (acc.length==2 && acc[0].equals(email) && acc[1].equals(password)) {
@@ -208,6 +211,8 @@ public class activityLogin extends AppCompatActivity  {
                 startActivity(i);
             } else {
                 //return;   //TODO mostrare un errore
+                Toast.makeText(this, R.string.msg_user_no_registred , Toast.LENGTH_SHORT).show();
+                return;
             }
         }
     }

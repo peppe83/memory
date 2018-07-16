@@ -1,5 +1,6 @@
 package com.vimo.memory;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -13,12 +14,15 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AutoCompleteTextView;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.vimo.memory.data.Account;
 import com.vimo.memory.utils.FileUtils;
@@ -31,7 +35,7 @@ import java.util.List;
 
 public class activityLogged extends AppCompatActivity {
 
-    private AutoCompleteTextView mSearchView;
+    private EditText mSearchView;
     private String user;
     File fileAccount;
     ArrayList<Account> listResult;
@@ -64,15 +68,7 @@ public class activityLogged extends AppCompatActivity {
         }
         setContentView(R.layout.activity_logged);
 
-        mSearchView = (AutoCompleteTextView) findViewById(R.id.txt_tag);
-
-        Button btnSearch = (Button) findViewById(R.id.btn_search);
-        btnSearch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                search();
-            }
-        });
+        mSearchView = (EditText) findViewById(R.id.txt_tag);
 
         /*ImageButton btnAdd = (ImageButton) findViewById(R.id.btn_add);
         btnAdd.setOnClickListener(new View.OnClickListener() {
@@ -86,7 +82,7 @@ public class activityLogged extends AppCompatActivity {
             }
         });*/
 
-        Typeface fontAwesomeFont = Typeface.createFromAsset(getAssets(), "fontawesome-webfont.ttf");
+        /*Typeface fontAwesomeFont = Typeface.createFromAsset(getAssets(), "fontawesome-webfont.ttf");
         Button btnAdd = (Button) findViewById(R.id.btn_add);
         btnAdd.setTypeface(fontAwesomeFont);
         btnAdd.setOnClickListener(new View.OnClickListener() {
@@ -98,18 +94,42 @@ public class activityLogged extends AppCompatActivity {
                 i.putExtra("user", user);
                 startActivity(i);
             }
+        });*/
+
+        Typeface fontAwesomeFont = Typeface.createFromAsset(getAssets(), "fontawesome-webfont.ttf");
+        Button btnSearch = (Button) findViewById(R.id.btn_search);
+        btnSearch.setTypeface(fontAwesomeFont);
+        btnSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                search();
+            }
         });
 
         listViewResult = (ListView) findViewById(R.id.listViewResult);
         CustomAdapter customAdapter = new CustomAdapter();
         listViewResult.setAdapter(customAdapter);
+
+        listViewResult.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Account acc = listResult.get(position);
+                Intent i = new Intent(activityLogged.this, ActivityDetails.class);
+                i.putExtra("session", true);
+                i.putExtra("user", user);
+                i.putExtra("account", acc.buildRow());
+                startActivity(i);
+            }
+        });
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.toolbar, menu);
         Typeface fontAwesomeFont = Typeface.createFromAsset(getAssets(), "fontawesome-webfont.ttf");
+
         TextDrawable faIcon = new TextDrawable(this);
-        //faIcon.setTextSize(TypedValue.COMPLEX_UNIT_DIP, 20);
         faIcon.setTextSize(TypedValue.COMPLEX_UNIT_PT, 15);
         faIcon.setTextAlign(Layout.Alignment.ALIGN_CENTER);
         int color = Color.parseColor("#2cb789");
@@ -118,13 +138,9 @@ public class activityLogged extends AppCompatActivity {
         faIcon.setTypeface(fontAwesomeFont);
         faIcon.setText(getResources().getText(R.string.font_awesome_android_add));
 
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.toolbar, menu);
-
         MenuItem menuItem = menu.findItem(R.id.action_add_account);
         menuItem.setIcon(faIcon);
         //menuItem.setOnMenuItemClickListener()
-
         return true;
     }
 
@@ -139,6 +155,13 @@ public class activityLogged extends AppCompatActivity {
                 i.putExtra("user", user);
                 startActivity(i);
                 break;
+
+            case R.id.action_logout:
+                Intent homeIntent = new Intent(Intent.ACTION_MAIN);
+                homeIntent.addCategory( Intent.CATEGORY_HOME );
+                homeIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                startActivity(homeIntent);
+                break;
             default:
                 break;
         }
@@ -148,6 +171,15 @@ public class activityLogged extends AppCompatActivity {
     private void search() {
         // Reset errors.
         // Store values at the time of the login attempt.
+        InputMethodManager imm = (InputMethodManager) this.getSystemService(Activity.INPUT_METHOD_SERVICE);
+        //Find the currently focused view, so we can grab the correct window token from it.
+        View view = this.getCurrentFocus();
+        //If no view currently has focus, create a new one, just so we can grab a window token from it
+        if (view == null) {
+            view = new View(this);
+        }
+        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+
         String tag = mSearchView.getText().toString();
         if (tag.equals("")) {
             mSearchView.setError(getString(R.string.error_field_required));
@@ -167,12 +199,8 @@ public class activityLogged extends AppCompatActivity {
                 listViewResult = (ListView) findViewById(R.id.listViewResult);
                 CustomAdapter customAdapter = new CustomAdapter();
                 listViewResult.setAdapter(customAdapter);
-
-                String msg = "trovato";
-                String ho = "";
             } else {
-                String msg = "non trovato";
-                String ho = "";
+                Toast.makeText(this, R.string.msg_no_contact_found , Toast.LENGTH_SHORT).show();
             }
 
         }
@@ -205,8 +233,8 @@ public class activityLogged extends AppCompatActivity {
             Account acc = listResult.get(i);
             txtKey.setText(acc.getTag());
             txtUsername.setText(acc.getUserName());
-            txtPassword.setText(acc.getPassword());
-
+            //txtPassword.setText(acc.getPassword());
+            txtPassword.setText("");
 
             return view;
         }

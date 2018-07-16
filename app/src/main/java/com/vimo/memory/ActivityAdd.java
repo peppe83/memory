@@ -18,9 +18,11 @@ import com.vimo.memory.data.Account;
 import com.vimo.memory.utils.FileUtils;
 
 import java.io.File;
+import java.util.List;
 
 public class ActivityAdd extends AppCompatActivity {
-
+    private int nextIdFile = 0;
+    private File fileAccount;
     private String user;
     //https://code.tutsplus.com/tutorials/android-essentials-creating-simple-user-forms--mobile-1758
 
@@ -74,6 +76,11 @@ public class ActivityAdd extends AppCompatActivity {
                 addAccount();
             }
         });*/
+
+        //recupero l'ultimo id e lo incremento di uno
+        fileAccount = new File(this.getFilesDir().getPath() + File.separator + FileUtils.encryptedFileNameAccount);
+        String content = FileUtils.decodeFile(fileAccount);
+        nextIdFile = FileUtils.getNextIdFile(content);
     }
 
     public void backView() {
@@ -92,6 +99,7 @@ public class ActivityAdd extends AppCompatActivity {
         TextView  txtViewPassword = (TextView) findViewById(R.id.txt_password);
         TextView  txtViewPassword2 = (TextView) findViewById(R.id.txt_confirm_password);
         TextView  txtViewOpt = (TextView) findViewById(R.id.txt_opt);
+        TextView  txtViewOpt2 = (TextView) findViewById(R.id.txt_cofirm_opt);
         TextView  txtViewLink = (TextView) findViewById(R.id.txt_link);
 
         String key = txtViewKey.getText().toString();
@@ -102,8 +110,8 @@ public class ActivityAdd extends AppCompatActivity {
             txtViewKey.setError(null);
             //TODO - faccio inserimento
             String idDb="";
-            String idFile="";
-            String idUser="";
+            String idFile = ""+nextIdFile;
+            String idUser = user;
             String type = (String)spinnerViewType.getSelectedItem(); //TODO
             /*Resources res = getResources();
             String[] types = res.getStringArray(R.array.typelist);
@@ -118,8 +126,21 @@ public class ActivityAdd extends AppCompatActivity {
             String password = txtViewPassword.getText().toString();
             String password2 = txtViewPassword2.getText().toString();
             String otp = txtViewOpt.getText().toString();
+            String otp2 = txtViewOpt2.getText().toString();
             String tagToSave=key;
             String delete = "false";
+
+            if (userName.equals("")) {
+                txtViewPassword2.setError(getString(R.string.error_field_required));
+                txtViewPassword2.requestFocus();
+                return;
+            }
+
+            if (password.equals("")) {
+                txtViewPassword.setError(getString(R.string.error_field_required));
+                txtViewPassword.requestFocus();
+                return;
+            }
 
             if (!password.equals(password2)) {
                 txtViewPassword2.setError(getString(R.string.error_field_pwd_no_match));
@@ -127,16 +148,27 @@ public class ActivityAdd extends AppCompatActivity {
                 return;
             }
 
+            if (otp.equals("")) {
+                txtViewOpt.setError(getString(R.string.error_field_required));
+                txtViewOpt.requestFocus();
+                return;
+            } else if (!otp.equals(otp2)) {
+                txtViewOpt2.setError(getString(R.string.error_field_otp_no_match));
+                txtViewOpt2.requestFocus();
+                return;
+            }
 
-            Account acc = new Account(idDb, idFile, idUser, idType, link, userName, password, otp, tagToSave, delete);
-
+            Account acc = new Account(idFile, idDb, idUser, idType, link, userName, password, otp, tagToSave, delete);
             File file = new File(this.getFilesDir().getPath() + File.separator + FileUtils.encryptedFileNameAccount);
             //String row = FileUtils.buildRowAccount(id,user,id_type, link,username,password,otp,keyword,delete);
             String row = acc.buildRow();
             //FileUtils.saveFile(file, row);
             FileUtils.addRow(file, row);
             //se non ci sono errori ritorno indietro
-            startActivity(new Intent(ActivityAdd.this, activityLogged.class));
+            Intent i = new Intent(ActivityAdd.this, activityLogged.class);
+            i.putExtra("session", true);
+            i.putExtra("user", user);
+            startActivity(i);
         }
     }
 }

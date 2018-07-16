@@ -11,16 +11,24 @@
     <string name="prompt_typeAdd">Tipo account</string>
     <string name="prompt_link">Link</string>
     <string name="prompt_opt">Opt</string>
+    <string name="prompt_confirm_opt">Conferma Opt</string>
     <string name="prompt_add">Aggiungi</string>
+    <string name="prompt_logout">Esci</string>
     <!--<string name="prompt_note">Note</string>-->
     <string name="action_sign_in">Accedi</string>
     <string name="action_search">Cerca</string>
+    <string name="show_detail">Dettagli</string>
     <string name="action_sign_in_short">Sign in</string>
     <string name="error_invalid_email">This email address is invalid</string>
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">Il campo è obbligatorio</string>
     <string name="error_field_pwd_no_match">Le due password sono diverse</string>
+    <string name="error_field_otp_no_match">I due campi sono diversi</string>
+    <string name="msg_no_contact_found">Nessun account trovato</string>
+    <string name="msg_no_user_registred">Utente non registrato</string>
+    <string name="msg_no_connection">Verificare la connessione internet</string>
+    <string name="msg_user_no_registred">Utente non registrato</string>
 
     <string name="font_awesome_android_save">&#xf0c7;</string>
     <string name="font_awesome_android_cancel">&#xf0e2;</string>
@@ -28,6 +36,7 @@
     <string name="font_awesome_android_login">&#xf2f6;</string>
     <string name="font_awesome_android_logout">&#xf2f5;</string>
     <string name="font_awesome_android_search">&#xf002;</string>
+    <string name="font_awesome_android_delete">&#xf1f8;</string>
 
     <string name="type1">Sito</string>
     <string name="type2">Identià</string>

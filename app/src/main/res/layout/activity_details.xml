@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ScrollView01"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:scrollbars="vertical">
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:orientation="vertical"
+        android:layout_height="fill_parent">
+
+        <LinearLayout android:layout_width="match_parent"
+            android:id="@+id/linearLayout1" android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/txt_show_detail"
+                android:layout_weight="1"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/show_detail"
+                android:textSize="10pt"></TextView>
+
+            <Button
+                android:id="@+id/btn_cancel_detail"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:textColor="#2cb789"
+                android:background="?android:attr/selectableItemBackground"
+                android:textSize="15pt"
+                android:text="@string/font_awesome_android_cancel">
+            </Button>
+
+            <Button
+                android:id="@+id/btn_delete"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:textColor="#2cb789"
+                android:background="?android:attr/selectableItemBackground"
+                android:textSize="15pt"
+                android:text="@string/font_awesome_android_delete">
+            </Button>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/txt_space"
+            android:layout_weight="1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="">
+        </TextView>
+
+        <TextView
+            android:id="@+id/txt_detail_type"
+            android:layout_weight="1"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/prompt_typeAdd"
+            android:textSize="10pt"></TextView>
+
+        <TextView
+            android:id="@+id/txt_detail_key"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/prompt_key_search"
+            android:inputType="text"
+            android:textIsSelectable="true"
+            android:textSize="10pt">
+        </TextView>
+
+        <TextView
+            android:id="@+id/txt_detail_username"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="@string/prompt_username"
+            android:textIsSelectable="true"
+            android:textSize="10pt"
+            android:inputType="text">
+        </TextView>
+
+        <TextView
+            android:id="@+id/txt_detail_password"
+            android:layout_height="wrap_content"
+            android:text="@string/prompt_password"
+            android:textIsSelectable="true"
+            android:inputType="text"
+            android:textSize="10pt"
+            android:layout_width="fill_parent">
+        </TextView>
+
+        <TextView
+            android:id="@+id/txt_detail_opt"
+            android:layout_height="wrap_content"
+            android:text="@string/prompt_opt"
+            android:textIsSelectable="true"
+            android:inputType="text"
+            android:textSize="10pt"
+            android:layout_width="fill_parent">
+        </TextView>
+
+        <TextView
+            android:id="@+id/txt_detail_link"
+            android:layout_height="wrap_content"
+            android:text="@string/prompt_link"
+            android:textIsSelectable="true"
+            android:inputType="textWebEditText"
+            android:autoLink="web"
+            android:textSize="10pt"
+            android:layout_width="fill_parent">
+        </TextView>
+    </LinearLayout>
+</ScrollView>

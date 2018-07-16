@@ -5,6 +5,8 @@ import com.vimo.memory.utils.FileUtils;
 import java.util.StringTokenizer;
 
 public class Account {
+    public static String DEFAULT_VALUE = "_";
+
     private String idFile;
     private String idDb;
     private String idUser;
@@ -16,7 +18,7 @@ public class Account {
     private String tag;
     private String delete;
 
-    public Account(String idDb, String idFile, String idUser, String idType, String link, String userName, String password, String otp, String tag, String delete) {
+    public Account(String idFile, String idDb, String idUser, String idType, String link, String userName, String password, String otp, String tag, String delete) {
         super();
         this.idDb = buildValue(idDb);
         this.idFile = buildValue(idFile);
@@ -31,7 +33,7 @@ public class Account {
     }
 
     private String buildValue(String value) {
-        if (value==null || value.equals("")) return "_";
+        if (value==null || value.equals("")) return DEFAULT_VALUE;
 
         return value;
     }
@@ -91,6 +93,22 @@ public class Account {
         this.tag = tag;
     }
 
+    public String getOtp() {
+        return otp;
+    }
+
+    public void setOtp(String otp) {
+        this.otp = otp;
+    }
+
+    public String getLink() {
+        return link;
+    }
+
+    public void setLink(String tag) {
+        this.tag = link;
+    }
+
     public String buildRow() {
         String SEP = FileUtils.SEPARATOR;
         String row = idFile+SEP+idDb+SEP+idUser+SEP+idType+SEP+link+SEP+userName+SEP+password+SEP+otp+SEP+tag+SEP+delete;
@@ -98,6 +116,8 @@ public class Account {
     }
 
     public static Account buildAccount(String row) {
+        if (row==null || row.equals("")) return null;
+
         StringTokenizer st = new StringTokenizer(row, FileUtils.SEPARATOR);
         int cont = st.countTokens();
         if (st.countTokens()==10) {
