@@ -115,25 +115,10 @@ public class FileUtils {
         return decrypted;
     }
 
-    /*public static String buildRowAccount(String id, String idUser, String id_type, String link, String username, String password, String otp, String keysearch, boolean delete) {
-        String row = id+SEPARATOR+idUser+SEPARATOR+id_type+SEPARATOR+link+SEPARATOR+username+SEPARATOR+password+SEPARATOR+otp+SEPARATOR+keysearch+SEPARATOR+delete;
-        return row;
-    }*/
-
-    private static String getInRow(String row, int index) {
-        if (row==null || row.equals("")) return null;
-
-        String[] acc = row.split(FileUtils.SEPARATOR);
-        if (acc.length>index) {
-            return acc[index];
-        }
-
-        return null;
-    }
-
-    public static List<Account> getKeySearchInFile(String contentFile, String tag) {
+    public static List<Account> getKeySearchInFile(File fileAccount, String tag) {
+        String content = FileUtils.decodeFile(fileAccount);
         ArrayList<Account> listAccount = new ArrayList<Account>();
-        StringTokenizer st = new StringTokenizer(contentFile, NEW_LINE);
+        StringTokenizer st = new StringTokenizer(content, NEW_LINE);
         for (; st.hasMoreTokens();) {
             String row = st.nextToken();
             Account acc = Account.buildAccount(row);
@@ -144,15 +129,10 @@ public class FileUtils {
         return listAccount;
     }
 
-    public static boolean getDeleteInRow(String row) {
-        String delete = getInRow(row, 8);
-        boolean del = Boolean.valueOf(delete);
-        return del;
-    }
-
-    public static int getNextIdFile(String contentFile) {
+    public static int getNextIdFile(File fileAccount) {
+        String content = FileUtils.decodeFile(fileAccount);
         ArrayList<Account> listAccount = new ArrayList<Account>();
-        StringTokenizer st = new StringTokenizer(contentFile, NEW_LINE);
+        StringTokenizer st = new StringTokenizer(content, NEW_LINE);
         int nextId = 0;
         Account acc = null;
         for (; st.hasMoreTokens();) {
@@ -165,4 +145,55 @@ public class FileUtils {
         }
         return nextId;
     }
+
+    public static boolean deleteAccountByIdFile(File fileAccount, String idFile) {
+        boolean del = false;
+        String content = FileUtils.decodeFile(fileAccount);
+        String rowToSave = "";
+        ArrayList<Account> listAccount = new ArrayList<Account>();
+        StringTokenizer st = new StringTokenizer(content, NEW_LINE);
+        for (; st.hasMoreTokens();) {
+            String row = st.nextToken();
+            Account acc = Account.buildAccount(row);
+            if (acc!=null && !acc.getIdFile().toLowerCase().equals(idFile.toLowerCase())) {
+                listAccount.add(acc);
+            } else {
+                del = true;
+            }
+        }
+
+        for (int i=0; i<listAccount.size(); i++) {
+            Account acc = listAccount.get(i);
+            rowToSave += acc.buildRow();
+
+            if (i!=listAccount.size()-1) {
+                rowToSave += NEW_LINE;
+            }
+        }
+
+        if (del) {
+            saveFile(fileAccount, rowToSave);
+        }
+
+        return del;
+    }
+
+
+        /*private static String getInRow(String row, int index) {
+        if (row==null || row.equals("")) return null;
+
+        String[] acc = row.split(FileUtils.SEPARATOR);
+        if (acc.length>index) {
+            return acc[index];
+        }
+
+        return null;
+    }*/
+
+        /*public static boolean getDeleteInRow(String row) {
+        String delete = getInRow(row, 8);
+        boolean del = Boolean.valueOf(delete);
+        return del;
+    }*/
+
 }

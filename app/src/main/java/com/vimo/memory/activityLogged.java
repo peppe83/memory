@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Layout;
@@ -19,12 +18,12 @@ import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.vimo.memory.data.Account;
+import com.vimo.memory.data.Constants;
 import com.vimo.memory.utils.FileUtils;
 import com.vimo.memory.utils.TextDrawable;
 
@@ -126,15 +125,13 @@ public class activityLogged extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.toolbar, menu);
+        inflater.inflate(R.menu.toolbar_logged, menu);
         Typeface fontAwesomeFont = Typeface.createFromAsset(getAssets(), "fontawesome-webfont.ttf");
 
         TextDrawable faIcon = new TextDrawable(this);
         faIcon.setTextSize(TypedValue.COMPLEX_UNIT_PT, 15);
         faIcon.setTextAlign(Layout.Alignment.ALIGN_CENTER);
-        int color = Color.parseColor("#2cb789");
-        faIcon.setTextColor(color);
-        //btn1.getBackground().mutate().setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC));*/
+        faIcon.setTextColor(Constants.COLOR_ICON_GREEN);
         faIcon.setTypeface(fontAwesomeFont);
         faIcon.setText(getResources().getText(R.string.font_awesome_android_add));
 
@@ -186,9 +183,7 @@ public class activityLogged extends AppCompatActivity {
             mSearchView.requestFocus();
         } else {
             mSearchView.setError(null);
-            //TODO - faccio la ricerca
-            String content = FileUtils.decodeFile(fileAccount);
-            List<Account> listAccount = FileUtils.getKeySearchInFile(content, tag);
+            List<Account> listAccount = FileUtils.getKeySearchInFile(fileAccount, tag);
             if (listAccount.size()>0) {
                 listResult = new ArrayList<Account>();
                 for (int i=0; i<listAccount.size(); i++) {
@@ -202,7 +197,6 @@ public class activityLogged extends AppCompatActivity {
             } else {
                 Toast.makeText(this, R.string.msg_no_contact_found , Toast.LENGTH_SHORT).show();
             }
-
         }
     }
 

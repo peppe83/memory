@@ -2,11 +2,14 @@
     <string name="app_name">memory</string>
 
     <!-- Strings related to login -->
+    <string name="yes">Si</string>
+    <string name="no">No</string>
+
     <string name="prompt_username">Username</string>
     <string name="prompt_password">Password</string>
     <string name="prompt_confirm_password">Conferma password</string>
     <!--<string name="prompt_tag">Tag</string>-->
-    <string name="add_account">Nuovo account</string>
+    <string name="add_account">Aggiungi nuovo account</string>
     <string name="prompt_key_search">Parola chiave</string>
     <string name="prompt_typeAdd">Tipo account</string>
     <string name="prompt_link">Link</string>
@@ -14,7 +17,9 @@
     <string name="prompt_confirm_opt">Conferma Opt</string>
     <string name="prompt_add">Aggiungi</string>
     <string name="prompt_logout">Esci</string>
-    <!--<string name="prompt_note">Note</string>-->
+    <string name="prompt_back">Indietro</string>
+    <string name="prompt_save">Salve</string>
+    <string name="prompt_delete">Elimina</string>
     <string name="action_sign_in">Accedi</string>
     <string name="action_search">Cerca</string>
     <string name="show_detail">Dettagli</string>
@@ -29,6 +34,9 @@
     <string name="msg_no_user_registred">Utente non registrato</string>
     <string name="msg_no_connection">Verificare la connessione internet</string>
     <string name="msg_user_no_registred">Utente non registrato</string>
+    <string name="msg_dialog_delete_title_confirm">Conferma</string>
+    <string name="msg_dialog_delete_confirm_delete_account">Sei sicuro di voler eliminare l\'account selezionato</string>
+    <string name="msg_dialog_delete_account_ok">Account eliminato</string>
 
     <string name="font_awesome_android_save">&#xf0c7;</string>
     <string name="font_awesome_android_cancel">&#xf0e2;</string>
