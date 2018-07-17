@@ -57,6 +57,11 @@ import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.KeySpec;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -168,7 +173,7 @@ public class activityLogin extends AppCompatActivity  {
             boolean exist = file.exists();
             System.out.print(exist);
         }
-
+        checkUserDb(email, password);   //TODO
         String content = FileUtils.decodeFile(file);
         if (content==null) {
             //non ho il file presente - lo creo
@@ -225,6 +230,39 @@ public class activityLogin extends AppCompatActivity  {
     private boolean isPasswordValid(String password) {
         //TODO: Replace this with your own logic
         return password.length() > 4;
+    }
+
+    protected boolean checkUserDb(String emailInput, String passwordInput) {
+        System.out.println("Select Records Example by using the Prepared Statement!");
+        Connection con = null;
+        int count = 0;
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            con = DriverManager.getConnection("jdbc:mysql://89.46.111.69/Sql1234652_1", "Sql1234652", "42rk613re6");
+            try {
+                String sql;
+                //	  sql
+                //	  = "SELECT title,year_made FROM movies WHERE year_made >= ? AND year_made <= ?";
+                sql = "SELECT * FROM users";
+                PreparedStatement prest = con.prepareStatement(sql);
+                ResultSet rs = prest.executeQuery();
+                while (rs.next()) {
+                    String username = rs.getString(1);
+                    String password = rs.getString(2);
+                    count++;
+                    System.out.println(username + "\t" + "- " + password);
+                }
+                System.out.println("Number of records: " + count);
+                prest.close();
+                con.close();
+            } catch (SQLException s) {
+                System.out.println("SQL statement is not executed!");
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return true;
     }
 
     protected boolean isOnline() {
