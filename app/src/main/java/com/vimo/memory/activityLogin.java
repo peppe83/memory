@@ -322,7 +322,7 @@ public class activityLogin extends AppCompatActivity  {
                         boolean appB = jObjUser.getBoolean("enabled");
                         String c = "";
                     }
-                    String enabled = (jObjUser.has("enabled")) ? jObjUser.getString("enabled") : ""; 
+                    String enabled = (jObjUser.has("enabled")) ? jObjUser.getString("enabled") : "";
 
                     String idUser = (jObjUser.has("id_user")) ? jObjUser.getString("id_user") : "";
                     String username = (jObjUser.has("username")) ? jObjUser.getString("username") : "";
