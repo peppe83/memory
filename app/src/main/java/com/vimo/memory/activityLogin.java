@@ -39,17 +39,30 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.vimo.memory.data.User;
 import com.vimo.memory.utils.FileUtils;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -63,7 +76,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -73,6 +88,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.net.ssl.HttpsURLConnection;
 
 public class activityLogin extends AppCompatActivity  {
 
@@ -173,7 +189,7 @@ public class activityLogin extends AppCompatActivity  {
             boolean exist = file.exists();
             System.out.print(exist);
         }
-        checkUserDb(email, password);   //TODO
+        User userDB = checkUserDb(this, email, password);   //TODO
         String content = FileUtils.decodeFile(file);
         if (content==null) {
             //non ho il file presente - lo creo
@@ -232,37 +248,104 @@ public class activityLogin extends AppCompatActivity  {
         return password.length() > 4;
     }
 
-    protected boolean checkUserDb(String emailInput, String passwordInput) {
-        System.out.println("Select Records Example by using the Prepared Statement!");
-        Connection con = null;
-        int count = 0;
-        try {
-            Class.forName("com.mysql.jdbc.Driver");
-            con = DriverManager.getConnection("jdbc:mysql://89.46.111.69/Sql1234652_1", "Sql1234652", "42rk613re6");
-            try {
-                String sql;
-                //	  sql
-                //	  = "SELECT title,year_made FROM movies WHERE year_made >= ? AND year_made <= ?";
-                sql = "SELECT * FROM users";
-                PreparedStatement prest = con.prepareStatement(sql);
-                ResultSet rs = prest.executeQuery();
-                while (rs.next()) {
-                    String username = rs.getString(1);
-                    String password = rs.getString(2);
-                    count++;
-                    System.out.println(username + "\t" + "- " + password);
-                }
-                System.out.println("Number of records: " + count);
-                prest.close();
-                con.close();
-            } catch (SQLException s) {
-                System.out.println("SQL statement is not executed!");
+    private String getPostDataString(HashMap<String, String> params) throws UnsupportedEncodingException{
+        StringBuilder result = new StringBuilder();
+        boolean first = true;
+        for(Map.Entry<String, String> entry : params.entrySet()){
+            if (first)
+                first = false;
+            else
+                result.append("&");
 
+            result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
+            result.append("=");
+            result.append(URLEncoder.encode(entry.getValue(), "UTF-8"));
+        }
+
+        return result.toString();
+    }
+
+    public String  performPostCall(String requestURL, HashMap<String, String> postDataParams) {
+        URL url;
+        String response = "";
+        try {
+            url = new URL(requestURL);
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setReadTimeout(15000);
+            conn.setConnectTimeout(15000);
+            conn.setRequestMethod("POST");
+            conn.setDoInput(true);
+            conn.setDoOutput(true);
+
+            OutputStream os = conn.getOutputStream();
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os, "UTF-8"));
+            writer.write(getPostDataString(postDataParams));
+
+            writer.flush();
+            writer.close();
+            os.close();
+            int responseCode=conn.getResponseCode();
+
+            if (responseCode == HttpsURLConnection.HTTP_OK) {
+                String line;
+                BufferedReader br=new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                while ((line=br.readLine()) != null) {
+                    response+=line;
+                }
+            } else {
+                response="";
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return true;
+        return response;
+    }
+
+    protected User checkUserDb(Context myContext, String uname, String pwd) {
+        try {
+            String urlLogin = "http://localhost/dev_memory_php/memory/users/loginUser.php";
+            //String urlLogin = "http://localhost/dev_memory_php/memory/users/loginUser.php?username="+name+"&password="+pwd;
+            HashMap<String,String> hasmMap = new HashMap<>();
+            hasmMap.put("username", uname);
+            hasmMap.put("password", pwd);
+            String response = performPostCall(urlLogin, hasmMap);
+            System.out.println(response);
+            JSONObject obj = new JSONObject(response);
+            if (obj.has("message")) {
+                Toast.makeText(myContext, obj.getString("message") , Toast.LENGTH_SHORT).show();
+            } else {
+                JSONArray jArrRecords = obj.getJSONArray("records");
+                if (jArrRecords.length()==1) {
+                    JSONObject jObjUser = jArrRecords.getJSONObject(0);
+                    if (jObjUser.has("enabled")) {
+                        String app = jObjUser.getString("enabled");
+                        boolean appB = jObjUser.getBoolean("enabled");
+                        String c = "";
+                    }
+                    String enabled = (jObjUser.has("enabled")) ? jObjUser.getString("enabled") : "";
+
+                    String idUser = (jObjUser.has("id_user")) ? jObjUser.getString("id_user") : "";
+                    String username = (jObjUser.has("username")) ? jObjUser.getString("username") : "";
+                    String password = (jObjUser.has("password")) ? jObjUser.getString("password") : "";
+                    String name = (jObjUser.has("name")) ? jObjUser.getString("name") : "";
+                    String surname = (jObjUser.has("surname")) ? jObjUser.getString("surname") : "";
+                    String email = (jObjUser.has("email")) ? jObjUser.getString("email") : "";
+                    String phone = (jObjUser.has("phone")) ? jObjUser.getString("phone") : "";
+
+                    String description = (jObjUser.has("description")) ? jObjUser.getString("description") : "";
+                    String date_creation = (jObjUser.has("date_creation")) ? jObjUser.getString("date_creation") : "";
+                    String role = (jObjUser.has("role")) ? jObjUser.getString("role") : "";
+
+                    User userObjDB = new User(idUser, username, password, name, surname, email, phone, true, description, date_creation, role);
+                    return userObjDB;
+                }
+
+               // {"records":[{"id_user":"3","username":"we","password":"we","name":"we","surname":"we","email":"we","phone":"we","enabled":"1","description":"","date_creation":"2018-07-17 14:17:14","role":"ROLE_ADMIN"}]}
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     protected boolean isOnline() {
